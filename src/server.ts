@@ -1,13 +1,9 @@
-import express, { Request, Response } from "express";
 import { Server } from "http";
 import mongoose from "mongoose";
 import { envVars } from "./app/config/env";
+import app from "./app";
 
 let server: Server;
-
-const app = express();
-
-app.use(express.json());
 
 const startServer = async () => {
   try {
@@ -24,10 +20,6 @@ const startServer = async () => {
     console.log(error);
   }
 };
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Welcome to Tour Management App");
-});
 
 startServer();
 
@@ -69,5 +61,3 @@ process.on("SIGTERM", () => {
 
 // Promise.reject(new Error("I forgot to catch this promise"));
 // throw new Error("I forgot to handle this local error");
-
-export default app;
