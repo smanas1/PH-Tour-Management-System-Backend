@@ -1,6 +1,9 @@
-import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
-import { generateToken } from "../../utils/jwt";
+
+import {
+  createNewAccessTokenWithRefreshToken,
+  createUserToken,
+} from "../../utils/userToken";
 import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 import bcrypt from "bcryptjs";
@@ -23,21 +26,28 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
     throw new AppError(400, "Incorrect Password");
   }
 
-  const jwtPayload = {
-    userId: isUserExist._id,
-    email: isUserExist.email,
-    role: isUserExist.role,
-  };
-  const accessToken = generateToken(
-    jwtPayload,
-    envVars.JWT_ACCESS_SECRET,
-    envVars.JWT_ACCESS_EXPIRES
-  );
+  const userTokens = createUserToken(isUserExist);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password: pass, ...rest } = isUserExist.toObject();
   return {
-    accessToken,
+    accessToken: userTokens.accessToken,
+    refreshToken: userTokens.refreshToken,
+    user: rest,
+  };
+};
+
+const getNewAccessToken = async (refreshToken: string) => {
+  const newAccessToken = await createNewAccessTokenWithRefreshToken(
+    refreshToken
+  );
+
+  return {
+    accessToken: newAccessToken,
   };
 };
 
 export const AuthService = {
   credentialsLogin,
+  getNewAccessToken,
 };
