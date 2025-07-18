@@ -4,14 +4,25 @@ import { UserServices } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 
+const updateUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+    const verifiedToken = req.user;
+
+    const payload = req.body;
+    const user = await UserServices.updateUser(userId, payload, verifiedToken);
+    sendResponse(res, {
+      success: true,
+      statusCode: 201,
+      message: "User Updated Successfully",
+      data: user,
+    });
+  }
+);
+
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await UserServices.createUser(req.body);
-
-    // res.status(201).json({
-    //   message: "User created successfully",
-    //   user,
-    // });
 
     sendResponse(res, {
       success: true,
@@ -37,4 +48,5 @@ const getAllUsers = catchAsync(
 export const UserControllers = {
   createUser,
   getAllUsers,
+  updateUser,
 };
